@@ -1,0 +1,19 @@
+{
+  "name": "loanzify-shortcut-plugin",
+  "version": "1.0.0",
+  "description": "Cordova plugin to add a custom shortcut to the home screen on Android",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rocky424/Loanzify-shortcut-plugin.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rocky424/Loanzify-shortcut-plugin/issues"
+  },
+  "homepage": "https://github.com/rocky424/Loanzify-shortcut-plugin#readme"
+}
