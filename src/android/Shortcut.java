@@ -70,46 +70,68 @@ try {
     byte[] decodedByte = Base64.decode(input, 0);
     return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length); 
 }
-
-private void shortcutAdd(String name, Bitmap bitmap)  throws ClassNotFoundException  {
-    // Intent to be send, when shortcut is pressed by user ("launched")
+private void shortcutAdd(String name, Bitmap bitmap) throws ClassNotFoundException {
+        // Intent to be send, when shortcut is pressed by user ("launched")
 
         String packageName = cordova.getActivity().getPackageName();
         Intent launchIntent = cordova.getActivity().getPackageManager().getLaunchIntentForPackage(packageName);
         String className = launchIntent.getComponent().getClassName();
 
-    Intent shortcutIntent = new Intent(cordova.getActivity().getApplicationContext(), Class.forName(className));
-    shortcutIntent.setAction("action_play");
+        Intent shortcutIntent = new Intent(cordova.getActivity().getApplicationContext(), Class.forName(className));
+        shortcutIntent.setAction("action_play");
 
-    // Decorate the shortcut
-    Intent addIntent = new Intent();
-    addIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-    addIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, name);
-    addIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON, bitmap);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+            shortcutManager = getSystemService(ShortcutManager.class);
+        }
 
-    // Inform launcher to create shortcut
-    addIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
-    cordova.getActivity().getApplicationContext().sendBroadcast(addIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (shortcutManager != null && shortcutManager.getPinnedShortcuts().size() == 0) {
+                if (shortcutManager.isRequestPinShortcutSupported()) {
+                    ShortcutInfo shortcut = new ShortcutInfo.Builder(cordova.getActivity().getApplicationContext(), "newPin")
+                            .setShortLabel(name)
+                            .setLongLabel("Open the App")
+                            .setIcon(Icon.createWithBitmap(bitmap))
+                            .setIntent(shortcutIntent)
+                            .build();
+                    shortcutManager.requestPinShortcut(shortcut, null);
+                } else {
+                    Toast.makeText(cordova.getActivity().getApplicationContext(), "Pinned shortcuts are not supported!", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(cordova.getActivity().getApplicationContext(), "Pinned shortcut was added", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // Decorate the shortcut
+            Intent addIntent = new Intent();
+            addIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+            addIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, name);
+            addIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON, bitmap);
 
+            // Inform launcher to create shortcut
+            addIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+            cordova.getActivity().getApplicationContext().sendBroadcast(addIntent);
+        }
+    }
 
-}
+    private void shortcutDel(String name) /*throws ClassNotFoundException*/ {
+        // Intent to be send, when shortcut is pressed by user ("launched")
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            String packageName = cordova.getActivity().getPackageName();
+            Intent launchIntent = cordova.getActivity().getPackageManager().getLaunchIntentForPackage(packageName);
+            String className = launchIntent.getComponent().getClassName();
 
-private void shortcutDel(String name) throws ClassNotFoundException {
-    // Intent to be send, when shortcut is pressed by user ("launched")
-       String packageName = cordova.getActivity().getPackageName();
-        Intent launchIntent = cordova.getActivity().getPackageManager().getLaunchIntentForPackage(packageName);
-        String className = launchIntent.getComponent().getClassName();
-    Intent shortcutIntent = new Intent(cordova.getActivity().getApplicationContext(), Class.forName(className));
-    shortcutIntent.setAction("action_play");
+            Intent shortcutIntent = new Intent(cordova.getActivity().getApplicationContext(), Class.forName(className));
+            shortcutIntent.setAction("action_play");
 
-    // Decorate the shortcut
-    Intent delIntent = new Intent();
-    delIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-    delIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, name);
+            // Decorate the shortcut
+            Intent delIntent = new Intent();
+            delIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+            delIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, name);
 
-    // Inform launcher to remove shortcut
-    delIntent.setAction("com.android.launcher.action.UNINSTALL_SHORTCUT");
-    cordova.getActivity().getApplicationContext().sendBroadcast(delIntent);
-  
-}
+            // Inform launcher to remove shortcut
+            delIntent.setAction("com.android.launcher.action.UNINSTALL_SHORTCUT");
+            cordova.getActivity().getApplicationContext().sendBroadcast(delIntent);
+        }
+    }
+
 }
