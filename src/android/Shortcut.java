@@ -3,13 +3,17 @@ package ch.itomy.plugin;
 import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Icon;
+import android.os.Build;
 import android.util.Base64;
 import android.content.Intent;
-import android.util.Log;
 import android.content.res.Resources;
-import java.lang.ClassNotFoundException;
+import android.widget.Toast;
 
 public class Shortcut extends CordovaPlugin {
 
@@ -33,7 +37,7 @@ try {
             shortcutDel(txt.toString());
             shortcutAdd(txt.toString(),bmp);
             callbackContext.success();
-     } catch (ClassNotFoundException e) {
+     } catch (Exception e) {
             e.printStackTrace();
 
             callbackContext.error(e.getLocalizedMessage());
@@ -52,7 +56,7 @@ try {
 try {
             shortcutDel(txt.toString());
              callbackContext.success();
-     } catch (ClassNotFoundException e) {
+     } catch (Exception e) {
             e.printStackTrace();
             callbackContext.error(e.getLocalizedMessage());
           
@@ -70,7 +74,7 @@ try {
     byte[] decodedByte = Base64.decode(input, 0);
     return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length); 
 }
-private void shortcutAdd(String name, Bitmap bitmap) throws ClassNotFoundException {
+private void shortcutAdd(String name, Bitmap bitmap) throws Exception {
         // Intent to be send, when shortcut is pressed by user ("launched")
 
         String packageName = cordova.getActivity().getPackageName();
@@ -79,9 +83,10 @@ private void shortcutAdd(String name, Bitmap bitmap) throws ClassNotFoundExcepti
 
         Intent shortcutIntent = new Intent(cordova.getActivity().getApplicationContext(), Class.forName(className));
         shortcutIntent.setAction("action_play");
+        ShortcutManager shortcutManager = null;
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
-            shortcutManager = getSystemService(ShortcutManager.class);
+            shortcutManager = cordova.getActivity().getSystemService(ShortcutManager.class);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -113,7 +118,7 @@ private void shortcutAdd(String name, Bitmap bitmap) throws ClassNotFoundExcepti
         }
     }
 
-    private void shortcutDel(String name) /*throws ClassNotFoundException*/ {
+    private void shortcutDel(String name) throws Exception {
         // Intent to be send, when shortcut is pressed by user ("launched")
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             String packageName = cordova.getActivity().getPackageName();
