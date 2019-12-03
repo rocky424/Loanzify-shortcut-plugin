@@ -87,9 +87,9 @@ private void shortcutAdd(String name, Bitmap bitmap) throws ClassNotFoundExcepti
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (shortcutManager != null && shortcutManager.getPinnedShortcuts().size() == 0) {
                 if (shortcutManager.isRequestPinShortcutSupported()) {
-                    ShortcutInfo shortcut = new ShortcutInfo.Builder(cordova.getActivity().getApplicationContext(), "newPin")
+                    ShortcutInfo shortcut = new ShortcutInfo.Builder(cordova.getActivity().getApplicationContext(), name)
                             .setShortLabel(name)
-                            .setLongLabel("Open the App")
+                            .setLongLabel("Open " + name)
                             .setIcon(Icon.createWithBitmap(bitmap))
                             .setIntent(shortcutIntent)
                             .build();
